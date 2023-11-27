@@ -7,10 +7,11 @@ from django.http import HttpResponse
 from django.urls import path
 from django.template.loader import get_template
 
-
+#ホーム
 def index(request):
     return render(request, 'personality_diagnosis/index.html')
 
+#urlとアカウント名に基づいてその人が作成したブログとurlを抽出
 def get_info(request):
     if request.method == 'POST':
         account_name = request.POST.get('account_name')
@@ -43,7 +44,7 @@ def get_info(request):
     else:
         return render(request, 'personality_diagnosis/index.html')
 
-
+#get_infoでgetしたurlをすべてスクレイピングしてjsonファイルに格納する
 def get_json(request):
     blog_info = request.session.get('blog_info')
 
