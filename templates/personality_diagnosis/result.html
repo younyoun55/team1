@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}">
+{% block content %}
+    <h1>{{account_name}}さんのブログ一覧</h1>
+    {% for title in titles %}
+    <p>{{ title }}</p>
+    {% endfor %}
+    {% for url in urls %}
+    <p>{{ url }}</p>
+    {% endfor %}
+    
+    <a href="{% url 'scrape' %}">
+        <button >スクレイピングを開始</button>
+       </a>
+
+    <a href="{% url 'index' %}">
+        <button >戻る</button>
+    </a>
+{% endblock %}
