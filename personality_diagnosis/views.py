@@ -16,40 +16,33 @@ def get_info(request):
     if request.method == 'POST':
         account_name = request.POST.get('account_name')
         url = request.POST.get('url')
+        r = requests.get(url)
+        soup = BeautifulSoup(r.content, 'lxml')
 
         titles = []
-        urls =[]
-        
-        while True:
-            response = requests.get(url)
-            html = response.text
-            soup = BeautifulSoup(html, 'html.parser')
-            entries = soup.select('.archive-entries section h1.entry-title a')
-        
-            for entry in entries:
-                titles.append(entry.text)
-                urls.append(entry['href'])
-
-            next_page = soup.select('.pager .pager-next a')
-            if not next_page:
-                break
-
+        urls = []      
+        for title in soup.find_all('a',class_='recent-entries-title'):
+            titles.append(title.text.strip())
+            print(f'title:{title}')
+        for a in soup.find_all('a', class_='recent-entries-title'):
+            url = a.get('href')
+            if url:
+                urls.append(url)
+            print(f'url:{url}')
         context = {
             'account_name': account_name,
             'titles': titles,
             'urls': urls,
-        }
-        request.session['blog_info'] = context
+            }
+        request.session['get_info'] = context   
         return render(request, 'personality_diagnosis/result.html', context)
     else:
         return render(request, 'personality_diagnosis/index.html')
 
 #get_infoでgetしたurlをすべてスクレイピングしてjsonファイルに格納する
 def get_json(request):
-    blog_info = request.session.get('blog_info')
-
-    if blog_info:
-        titles = blog_info.get('titles', [])
+    if request.method == 'POST':
+        blog_info = request.session.get('blog_info')
         urls = blog_info.get('urls', [])
 
         articles = []
@@ -58,16 +51,26 @@ def get_json(request):
             response = requests.get(url)
             html = response.text
             soup = BeautifulSoup(html, 'html.parser')
-            article_text = soup.select_one('.article-body').text.strip()  
-            articles.append({'title': titles[urls.index(url)], 'text': article_text})
+            article_texts = ' '.join([p.text.strip() for p in soup.find_all(class_='hatenablog-entry')]) 
+            articles.append(article_texts)
+        
+        filename = 'blog_data.json'
 
-        json_filename = 'blog_data.json'
-        with open(json_filename, 'w', encoding='utf-8') as json_file:
+        with open(filename, 'w', encoding='utf-8') as json_file:
             json.dump(articles, json_file, ensure_ascii=False, indent=4)
 
-        return HttpResponse(f'JSONファイル "{json_filename}" が作成されました。')
+        with open(filename, 'rb') as file:
+            response = HttpResponse(file.read(), content_type='application/json')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        return response
     else:
-        return HttpResponse('セッションにブログ情報が存在しません。')
+        return HttpResponse('jsonファイルのダウンロードに失敗しました。')
+    
+    
+
+   
+
 
 
 

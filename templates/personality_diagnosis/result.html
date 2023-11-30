@@ -3,12 +3,19 @@
 <link rel="stylesheet" href="{% static 'style.css' %}">
 {% block content %}
     <h1>{{account_name}}さんのブログ一覧</h1>
-    {% for title in titles %}
-    <p>{{ title }}</p>
-    {% endfor %}
-    {% for url in urls %}
-    <p>{{ url }}</p>
-    {% endfor %}
+    <h2>Tタイトル一覧:</h2>
+        <ul>
+            {% for title in titles %}
+                <li>{{ title }}</li>
+            {% endfor %}
+        </ul>
+
+    <h2>URL:</h2>
+        <ul>
+            {% for url in urls %}
+                <li>{{ url }}</li>
+            {% endfor %}
+        </ul>
     
     <a href="{% url 'get_json' %}">
         <button >スクレイピングを開始</button>
