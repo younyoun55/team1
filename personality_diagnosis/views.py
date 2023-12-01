@@ -15,6 +15,7 @@ def index(request):
 def get_info(request):
     if request.method == 'POST':
         account_name = request.POST.get('account_name')
+        account_id = request.POST.get('account_id')
         url = request.POST.get('url')
         r = requests.get(url)
         soup = BeautifulSoup(r.content, 'lxml')
@@ -23,17 +24,19 @@ def get_info(request):
         urls = []      
         for title in soup.find_all('a',class_='recent-entries-title'):
             titles.append(title.text.strip())
-            print(f'title:{title}')
+           
         for a in soup.find_all('a', class_='recent-entries-title'):
             url = a.get('href')
             if url:
                 urls.append(url)
-            print(f'url:{url}')
+        
         context = {
             'account_name': account_name,
+            'account_id':account_id,
             'titles': titles,
             'urls': urls,
             }
+        
         request.session['get_info'] = context   
         return render(request, 'personality_diagnosis/result.html', context)
     else:
@@ -42,19 +45,23 @@ def get_info(request):
 #get_infoでgetしたurlをすべてスクレイピングしてjsonファイルに格納する
 def get_json(request):
     if request.method == 'POST':
-        blog_info = request.session.get('blog_info')
+        blog_info = request.session.get('get_info')
         urls = blog_info.get('urls', [])
+        account_id = blog_info.get('account_id')
+
+        print(f"urls:{urls}")
 
         articles = []
 
         for url in urls:
-            response = requests.get(url)
-            html = response.text
-            soup = BeautifulSoup(html, 'html.parser')
+            r = requests.get(url)
+            soup = BeautifulSoup(r.content, 'html.parser')
             article_texts = ' '.join([p.text.strip() for p in soup.find_all(class_='hatenablog-entry')]) 
             articles.append(article_texts)
+
+           
         
-        filename = 'blog_data.json'
+        filename = f'{account_id}.json'
 
         with open(filename, 'w', encoding='utf-8') as json_file:
             json.dump(articles, json_file, ensure_ascii=False, indent=4)
@@ -66,7 +73,7 @@ def get_json(request):
         return response
     else:
         return HttpResponse('jsonファイルのダウンロードに失敗しました。')
-    
+        
     
 
    

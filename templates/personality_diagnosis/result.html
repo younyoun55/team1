@@ -17,9 +17,10 @@
             {% endfor %}
         </ul>
     
-    <a href="{% url 'get_json' %}">
-        <button >スクレイピングを開始</button>
-       </a>
+    <form method="post" action="{% url 'get_json' %}">
+        {% csrf_token %}
+        <button type="submit">スクレイピングを開始</button>
+    </form>
 
     <a href="{% url 'index' %}">
         <button >戻る</button>
