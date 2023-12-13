@@ -1,7 +1,8 @@
-#!/usr/bin/env python
+#!/workspaces/team1/.venv/bin/python
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import django
 
 
 def main():
