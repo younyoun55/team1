@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<section>
+    <h3>ChatGPTによる性格診断</h3>
+</section>
+<hr>
+
+{% if response %}
+<section>
+    <p><strong>ブログ内容：</strong><br>
+    <div class="box">
+        {{input_text}}
+    </div><br>
+
+    <strong>性格診断結果：</strong><br>
+    <div class="box">
+       {{response}}
+    </div>
+    <br><br>
+</section>
+{% endif %}
+
+{% endblock %}
